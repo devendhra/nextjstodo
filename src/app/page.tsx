@@ -19,7 +19,6 @@ export default function HomePage() {
 
   const [taskText, setTaskText] = useState("");
 
-  if (!userId) return null;
   const { data: tasks = [], isLoading } = useTodos(userId);
   const addTodo = useAddTodo(userId);
   const deleteTodo = useDeleteTodo(userId);
@@ -37,6 +36,7 @@ export default function HomePage() {
     }
   };
 
+  if (!userId) return null;
 
   return (
     <div className="p-6 max-w-xl mx-auto">

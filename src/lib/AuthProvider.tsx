@@ -1,17 +1,24 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from './supabaseClient';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from './supabaseClient';
+import { User } from '@supabase/supabase-js';
 
 type AuthContextType = {
-  user: any;
+  user: User | null;
 };
 
 const AuthContext = createContext<AuthContextType>({ user: null });
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<any>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,7 +30,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         setUser(session.user);
         router.push('/');
@@ -34,9 +43,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => {
-      listener?.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
-  }, []);
+  }, [router]); 
 
   return (
     <AuthContext.Provider value={{ user }}>
@@ -46,6 +55,3 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-
-
-
